@@ -1,0 +1,3 @@
+rootProject.name='carben_chepai_recgnize'
+include ':app'
+include ':carplate'
