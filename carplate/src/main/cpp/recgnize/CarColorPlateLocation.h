@@ -15,6 +15,7 @@ public:
     void thresholdCarPlate(Mat& src, Mat& dis, ColorHsv* normalHsv, ColorHsv* targetHsv );
 
 
+private:
 };
 #endif // CarColorPlateLocation_H
 

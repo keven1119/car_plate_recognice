@@ -19,8 +19,8 @@ int CarPlateLocation::verifySizes(RotatedRect rotated_rect) {
     //最小 最大面积 不符合的丢弃
     //给个大概就行 随时调整
     //尽量给大一些没关系， 这还是初步筛选。
-    int min = 20 * aspect * 20;
-    int max = 180 * aspect * 180;
+    int min = 20 * aspect ;
+    int max = 180 * aspect * 1800;
 
     //比例浮动 error认为也满足
     //最小宽、高比
@@ -30,7 +30,7 @@ int CarPlateLocation::verifySizes(RotatedRect rotated_rect) {
     //矩形的面积
     float area = rotated_rect.size.height * rotated_rect.size.width;
     //矩形的比例
-    float r = (float)rotated_rect.size.width / (float)rotated_rect.size.height;
+    float r = (float)rotated_rect.boundingRect().width / (float)rotated_rect.boundingRect() .height;
     if ((area < min || area > max) || (r < rmin || r > rmax))
         return 0;
     return 1;
@@ -78,7 +78,7 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
         }
 
         PlateBean plate_msg_bean;
-        
+
         //定义大小
         Mat plate_mat;
         //高+宽
@@ -92,7 +92,7 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
         plate_msg_bean.offsetCenterWidth = roi_rect_size.width;
         plate_msg_bean.offsetCenterHeight = roi_rect_size.height;
 
-        
+
         dst_plates.push_back(plate_msg_bean);
         dst.release();
     }

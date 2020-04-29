@@ -69,10 +69,9 @@ void CarSobelPlateLocation::location(Mat src, vector<PlateBean>& dst) {
     tortuosity(src, vec_sobel_roi, dst);
     
     
-    /*for (Mat s : dst) {
-        imshow("候选1", s);
-        
-    }*/
+    for (PlateBean s : dst) {
+        s.type = 2;
+    }
     
     //更进一步的筛选
     //借助svm 进一步筛选

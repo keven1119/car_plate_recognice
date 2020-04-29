@@ -19,6 +19,7 @@ public:
     float offsetCenterY;
     float offsetCenterWidth;
     float offsetCenterHeight;
+    int type = 0; //1:通过颜色获取  ，2：通过sobel获取的
 
     float angle;
     

@@ -9,6 +9,8 @@ CarColorPlateLocation::CarColorPlateLocation(){
 CarColorPlateLocation::~CarColorPlateLocation() {
 
 }
+
+
 void CarColorPlateLocation::thresholdCarPlate(Mat& src, Mat& dis, ColorHsv* normalHsv, ColorHsv* targetHsv){
     cvtColor(src,dis,COLOR_BGR2HSV);
 
@@ -35,11 +37,14 @@ void CarColorPlateLocation::thresholdCarPlate(Mat& src, Mat& dis, ColorHsv* norm
             // «∑ÒŒ™¿∂…´œÒÀÿµ„µƒ±Íº«
             bool isColorPlate = false;
             //¿∂…´
-            if (h >= 100 && h <= 124 && s >= 125 && s <= 255 && v >= 100  && v <= 255) {
+            if (h >= 100 && h <= 124 && s >= 125  && s <= 255 && v >= 100  && v <= 255) {
                 //蓝色
                 isColorPlate = true;
             }else if (h >= 11 && h <= 34 && s >= 100 && s <= 255 && v >= 100 && v <= 255) {
                 //黄色
+                isColorPlate = true;
+            }else if (h >= 35 && h <= 77 && s >= 44 && s <= 255 && v >=46 && v <= 255) {
+                //绿色
                 isColorPlate = true;
             }
             //∞—¿∂…´œÒÀÿ Õπœ‘≥ˆ¿¥ £¨∆‰À˚µƒ«¯”Ú»´±‰≥…∫⁄…´
@@ -79,19 +84,28 @@ void CarColorPlateLocation::location(Mat src, vector<PlateBean>& dst) {
 
     delete normalHsv;
     delete targetHsv;
+
+//    imshow("hsv threshold", hsv);
+//    waitKey();
+
     //∞—¡¡∂» ˝æ›≥È≥ˆ¿¥
     //∞—h°¢s°¢v∑÷¿Î≥ˆ¿¥
     vector<Mat> hsv_split;
     split(hsv, hsv_split);
-    
+
     //∂˛÷µªØ
     Mat shold;
     threshold(hsv_split[2], shold, 0, 255, THRESH_OTSU + THRESH_BINARY);
 
-    Mat close;
-    Mat element = getStructuringElement(MORPH_RECT, Size(17, 3));
-    morphologyEx(shold, close, MORPH_CLOSE, element);
-    
+
+//    imshow("color threshold", shold);
+//    waitKey();
+
+    Mat close = shold ;
+//    Mat element = getStructuringElement(MORPH_RECT, Size(51,20));
+//    morphologyEx(shold, close, MORPH_CLOSE, element);
+//
+
     //6°¢≤È’“¬÷¿™
     //ªÒµ√≥ı≤Ω…∏—°≥µ≈∆¬÷¿™================================================================
     //¬÷¿™ºÏ≤‚
@@ -102,18 +116,33 @@ void CarColorPlateLocation::location(Mat src, vector<PlateBean>& dst) {
     vector<RotatedRect> vec_color_roi;
     for (vector<Point> point : contours) {
         RotatedRect rotatedRect = minAreaRect(point);
-        //rectangle(src, rotatedRect.boundingRect(), Scalar(255, 0, 255));
+
         //Ω¯––≥ı≤Ωµƒ…∏—° ∞—ÕÍ»´≤ª∑˚∫œµƒ¬÷¿™∏¯≈≈≥˝µÙ ( ±»»Á£∫1x1£¨5x1000 )
         if (verifySizes(rotatedRect)) {
+
             vec_color_roi.push_back(rotatedRect);
         }
     }
-    
+
+
+//    imshow("frame src", src);
+//    waitKey();
+
+
+
+
+
     tortuosity(src, vec_color_roi, dst);
     /*for (Mat s : dst) {
         imshow("∫Ú—°2", s);
         waitKey();
     }*/
+
+    for (PlateBean s : dst) {
+        s.type = 1;
+    }
 }
+
+
 
 

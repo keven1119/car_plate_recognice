@@ -7,20 +7,20 @@
 string CarPlateRecgnize::ZHCHARS[] = { "川","鄂","赣","甘","贵","桂","黑","沪","冀","津","京","吉","辽","鲁","蒙","闽","宁","青","琼","陕","苏","晋","皖","湘","新","豫","渝","粤","云","藏","浙" };
 char CarPlateRecgnize::CHARS[] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z' };
 
-CarPlateRecgnize::CarPlateRecgnize(const char* svm_model, const char* ann_ch_path, const char* ann_path) {
+CarPlateRecgnize::CarPlateRecgnize(const char* svm_model,const char* ann_ch_path,const char* ann_path) {
     plateLocation = new CarSobelPlateLocation();
     plateColorLocation = new CarColorPlateLocation();
 
     svm = SVM::load(svm_model);
-    //≤Œ ˝1µƒøÌ-≤Œ ˝2µƒøÌ Ω·π˚”Î≤Œ ˝3µƒ”‡ ˝Œ™0  ∏ﬂ“≤“ª—˘
+    //参数1的宽-参数2的宽 结果与参数3的余数为0  高也一样
     svmHog = new HOGDescriptor(Size(128,64),Size(16,16),Size(8,8),Size(8,8),3);
-    
 
-    //¥¥Ω®Ãÿ’˜Ã·»°∂‘œÛ
+
+    //创建特征提取对象
     annHog = new HOGDescriptor(Size(32, 32), Size(16, 16), Size(8, 8), Size(8, 8), 3);
-    // ∂±∫∫◊÷
+    //识别汉字
     annCh = ANN_MLP::load(ann_ch_path);
-    // ∂±ƒ£–Õ
+    //识别模型
     ann = ANN_MLP::load(ann_path);
 }
 
@@ -48,13 +48,14 @@ CarPlateRecgnize::~CarPlateRecgnize() {
 }
 
 /*
-*      ∂±≥µ≈∆ ∑µªÿΩ·π˚∏¯µ˜”√’ﬂ
-*        1°¢∂®Œª
-*        2°¢ ∂±
+*     识别车牌 返回结果给调用者
+*        1、定位
+*        2、识别
 */
 PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
     PlateInPicMsgBean* plate_total_msg = new PlateInPicMsgBean();
+
 
     vector< PlateBean > sobel_plates;
     //sobel定位
@@ -113,53 +114,58 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
     }
 
     Mat dst;
+    int plate_from_type = 0;
 
 
     if (index >= 0) {
+
         PlateBean target_plate = plates[index];
+        plate_from_type = target_plate.type;
 
         dst = target_plate.plateMat.clone();
-        plate_total_msg->angle = target_plate.angle;
         plate_total_msg->offsetCenterX = target_plate.offsetCenterX;
         plate_total_msg->offsetCenterY = target_plate.offsetCenterY;
         plate_total_msg->offsetWidth = target_plate.offsetCenterWidth;
         plate_total_msg->offsetHeight = target_plate.offsetCenterHeight;
-    } else{
 
-        return plate_total_msg;
+    }else{
+        return new PlateInPicMsgBean();
     }
-
     // 释放
     for (PlateBean p : plates) {
         p.release();
     }
-//    //imshow("车牌", dst);
-//    Mat plate_gray;
-//    cvtColor(dst, plate_gray,COLOR_BGR2GRAY);
-
-    //将牌照背景和文字二值化
-    Mat plate_threshold;
-
-    ColorHsv* normalHsv = new ColorHsv();
-    normalHsv->hsv_h = 255;
-    normalHsv->hsv_s = 255;
-    normalHsv->hsv_v = 255;
-
-    ColorHsv* targetHsv= new ColorHsv();
-    targetHsv->hsv_h = 0;
-    targetHsv->hsv_s = 0;
-    targetHsv->hsv_v = 0;
-    plateColorLocation->thresholdCarPlate(dst, plate_threshold,normalHsv, targetHsv);
-
-
-
-//    imshow("plate_shold",plate_threshold);
-//    waitKey();
-
+    //    //imshow("车牌", dst);
+    //    Mat plate_gray;
+    //    cvtColor(dst, plate_gray,COLOR_BGR2GRAY);
 
     Mat plate_gray;
-    cvtColor(plate_threshold, plate_threshold, COLOR_HSV2RGB);
-    cvtColor(plate_threshold, plate_gray, COLOR_RGB2GRAY);
+
+    if(plate_from_type == 1) {
+        //通过颜色识别出的图形，使用原来颜色的二值器进行二值化
+        //将牌照背景和文字二值化
+        Mat plate_threshold;
+
+        ColorHsv *normalHsv = new ColorHsv();
+        normalHsv->hsv_h = 255;
+        normalHsv->hsv_s = 255;
+        normalHsv->hsv_v = 255;
+
+        ColorHsv *targetHsv = new ColorHsv();
+        targetHsv->hsv_h = 0;
+        targetHsv->hsv_s = 0;
+        targetHsv->hsv_v = 0;
+        plateColorLocation->thresholdCarPlate(dst, plate_threshold, normalHsv, targetHsv);
+
+        cvtColor(plate_threshold, plate_threshold, COLOR_HSV2RGB);
+        cvtColor(plate_threshold, plate_gray, COLOR_RGB2GRAY);
+
+        delete normalHsv;
+        delete targetHsv;
+    } else {
+        cvtColor(dst,plate_gray, COLOR_BGR2GRAY);
+    }
+
 
     Mat plate_shold;
     threshold(plate_gray, plate_shold,0,255, THRESH_OTSU + THRESH_BINARY);
@@ -171,7 +177,7 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
 //    imshow("macth",dst);
 //    waitKey();
-
+//
 //    imshow("clear fix plate_shold",plate_shold);
 //    waitKey();
 
@@ -219,26 +225,27 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
         //包含了所有待识别的字符图片
         int cout = 0;
-        for (size_t i = cityIndex; i < charVec.size(); i++)
+        for (size_t i = cityIndex; i < charVec.size();   i++)
         {
             plateChar.push_back(plate_shold(charVec[i]));
         }
         predict(plateChar,plate_str);
 
     } else{
-        plate_total_msg->offsetCenterY = 0;
-        plate_total_msg->offsetCenterX = 0;
-        plate_total_msg->offsetWidth = 0;
-        plate_total_msg->offsetHeight = 0;
+        plate_total_msg->offsetCenterX = 0.0;
+        plate_total_msg->offsetCenterY = 0.0;
+        plate_total_msg->offsetWidth = 0.0;
+        plate_total_msg->offsetHeight = 0.0;
     }
 
-    plate_gray.release();
-    plate_shold.release();
-    delete normalHsv;
-    delete targetHsv;
 
-    // 车牌内容
+
+//    plate_gray.release();
+    plate_shold.release();
+
+
     plate_total_msg->plate = (char*)plate_str.c_str();
+
     return plate_total_msg;
 }
 //Ã·»°Ãÿ’˜
