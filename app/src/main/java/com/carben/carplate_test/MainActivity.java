@@ -1,4 +1,4 @@
-package com.carben.carben;
+package com.carben.carplate_test;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,10 +21,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.carben.carplate.OnPlateMsgListener;
+import com.carben.carplate.PlateParam;
 import com.carben.carplate.RecognicePlateHelper;
 
-public class MainActivity extends AppCompatActivity implements OnPlateMsgListener {
+public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
 
@@ -73,12 +73,60 @@ public class MainActivity extends AppCompatActivity implements OnPlateMsgListene
 
                 String realPath = picFilePath.replace("/storage/emulated/0", "sdcard");
 
-                new RecognicePlateHelper().getPlateMsg(
+                final PlateParam plateMsg = new RecognicePlateHelper().getPlateMsg(
                         "sdcard/HOG_SVM_DATA2.xml",
                         "sdcard/HOG_ANN_ZH_DATA2.xml",
                         "sdcard/HOG_ANN_DATA2.xml",
-                        realPath,
-                        MainActivity.this);
+                        realPath);
+
+                ImageView imageView = new ImageView(MainActivity.this);
+                imageView.setBackgroundColor(Color.RED);
+
+
+                int containerWidth = coverContainer.getWidth();
+                int orignalWidth = currentBitmap.getWidth();
+
+                float ratio =  (float) containerWidth/ orignalWidth;
+
+                int coverWidth = (int)(plateMsg.getOffsetWidth() * ratio);
+                int coverHeight = (int)(plateMsg.getOffsetHeight() * ratio);
+
+
+                int coverMarginLeft = (int)( plateMsg.getOffsetCenterX() * ratio - (float)coverWidth/2);
+                int coverMarginTop = (int)(plateMsg.getOffsetCenterY() * ratio - (float)coverHeight/2);
+
+                coverContainer.addView(imageView);
+
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams)imageView.getLayoutParams();
+
+                layoutParams.leftMargin = coverMarginLeft;
+                layoutParams.topMargin = coverMarginTop;
+
+                layoutParams.width = coverWidth;
+                layoutParams.height = coverHeight;
+
+                imageView.setLayoutParams(layoutParams);
+                imageView.setPivotX(coverWidth/2f);
+                imageView.setPivotY(coverHeight/2f);
+                imageView.setRotation(plateMsg.getAngle());
+
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this,
+                                plateMsg.getPlateNum() + "\n" +
+                                        plateMsg.getAngle() + "\n" +
+                                        plateMsg.getOffsetCenterX() + "\n" +
+                                        plateMsg.getOffsetCenterY() + "\n" +
+                                        plateMsg.getOffsetWidth() + "\n" +
+                                        plateMsg.getOffsetHeight() + "\n" +
+                                        plateMsg.getPicFilePath() + "\n" +
+                                        plateMsg.getPicHeight() + "\n" +
+                                        plateMsg.getPicWidth() + "\n" ,Toast.LENGTH_LONG)
+                                .show();
+                    }
+                });
             }
         });
 
@@ -158,64 +206,4 @@ public class MainActivity extends AppCompatActivity implements OnPlateMsgListene
         picView.setLayoutParams(layoutParams);
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
-
-
-    @Override
-    public void onParsePlateFail() {
-
-    }
-
-    @Override
-    public void onParsePlateSuc(final String plateNum, final float offsetCenterX, final float offsetCenterY, final float offsetWidth, final float offsetHeight, final float angle) {
-        ImageView imageView = new ImageView(this);
-        imageView.setBackgroundColor(Color.RED);
-
-
-        int containerWidth = coverContainer.getWidth();
-        int orignalWidth = currentBitmap.getWidth();
-
-        float ratio =  (float) containerWidth/ orignalWidth;
-
-        int coverWidth = (int)(offsetWidth * ratio);
-        int coverHeight = (int)(offsetHeight * ratio);
-
-
-        int coverMarginLeft = (int)( offsetCenterX * ratio - (float)coverWidth/2);
-        int coverMarginTop = (int)(offsetCenterY * ratio - (float)coverHeight/2);
-
-        coverContainer.addView(imageView);
-
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams)imageView.getLayoutParams();
-
-        layoutParams.leftMargin = coverMarginLeft;
-        layoutParams.topMargin = coverMarginTop;
-
-        layoutParams.width = coverWidth;
-        layoutParams.height = coverHeight;
-
-        imageView.setLayoutParams(layoutParams);
-        imageView.setPivotX(coverWidth/2f);
-        imageView.setPivotY(coverHeight/2f);
-        imageView.setRotation(angle);
-
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this,
-                        plateNum +"\n" +
-                        angle +"\n" +
-                        offsetCenterX +"\n" +
-                        offsetCenterY +"\n" +
-                        offsetWidth +"\n" +
-                        offsetHeight +"\n" ,Toast.LENGTH_LONG)
-                        .show();
-            }
-        });
-    }
 }

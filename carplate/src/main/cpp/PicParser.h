@@ -10,6 +10,7 @@
 #include "JavaCallHelper.h"
 #include "include/opencv2/core/mat.hpp"
 #include <pthread.h>
+#include <PlateInPicMsgBean.h>
 
 using namespace cv;
 
@@ -17,12 +18,12 @@ using namespace cv;
 class PicParser{
 
 public:
-    JavaCallHelper* javaCallHelper=0;
+//    JavaCallHelper* javaCallHelper=0;
 
-    PicParser(JavaCallHelper* callHelper);
+    PicParser();
     ~PicParser();
 
-    void parsePic(ParsePicParam* parsePicParam);
+    PlateInPicMsgBean* parsePic(ParsePicParam* parsePicParam);
 
 
 };

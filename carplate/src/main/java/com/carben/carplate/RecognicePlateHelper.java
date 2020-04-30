@@ -7,11 +7,12 @@ public class RecognicePlateHelper {
         System.loadLibrary("car-plate-recognice");
     }
 
+//    public native void getString();
 
-    public native void getPlateMsg(
+
+    public native PlateParam getPlateMsg(
             String hogPlateShapeModel,
             String hogAnnZhModel,
             String hogAnnModel,
-            String picFilePath,
-            OnPlateMsgListener onPlateMsgListener);
+            String picFilePath);
 }

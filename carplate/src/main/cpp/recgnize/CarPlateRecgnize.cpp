@@ -125,6 +125,7 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
         dst = target_plate.plateMat.clone();
         plate_total_msg->offsetCenterX = target_plate.offsetCenterX;
         plate_total_msg->offsetCenterY = target_plate.offsetCenterY;
+        plate_total_msg->angle = target_plate.angle;
         plate_total_msg->offsetWidth = target_plate.offsetCenterWidth;
         plate_total_msg->offsetHeight = target_plate.offsetCenterHeight;
 

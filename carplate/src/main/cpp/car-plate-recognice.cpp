@@ -7,29 +7,28 @@
 #include "PicParser.h"
 
 
-JavaVM *javaVm = 0;
-pthread_mutex_t mutex;
+//JavaVM *javaVm = 0;
+//pthread_mutex_t mutex;
 
-int JNI_OnLoad(JavaVM *vm, void *r) {
-    javaVm = vm;
-    return JNI_VERSION_1_6;
-}
+//int JNI_OnLoad(JavaVM *vm, void *r) {
+//    javaVm = vm;
+//    return JNI_VERSION_1_6;
+//}
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_carben_carben_MainActivity_stringFromJNI(
-        JNIEnv* env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}extern "C"
-JNIEXPORT void JNICALL
+//extern "C" JNIEXPORT jstring JNICALL
+//Java_com_carben_carben_MainActivity_stringFromJNI(
+//        JNIEnv* env,
+//        jobject /* this */) {
+//    std::string hello = "Hello from C++";
+//    return env->NewStringUTF(hello.c_str());
+//}
+extern "C"
+JNIEXPORT jobject JNICALL
 Java_com_carben_carplate_RecognicePlateHelper_getPlateMsg(JNIEnv *env, jobject thiz,
-                                                jstring hog_plate_shape_model,
-                                                jstring hog_ann_zh_model, jstring hog_ann_model,
-                                                jstring pic_file,
-                                                jobject on_plate_msg_listener) {
-
-
+                                                          jstring hog_plate_shape_model,
+                                                          jstring hog_ann_zh_model,
+                                                          jstring hog_ann_model,
+                                                          jstring pic_file) {
     ParsePicParam* parsePicParam = new ParsePicParam();
 
     char* hog_model_file_path = const_cast<char *>(env->GetStringUTFChars(hog_plate_shape_model,0));
@@ -49,18 +48,48 @@ Java_com_carben_carplate_RecognicePlateHelper_getPlateMsg(JNIEnv *env, jobject t
     parsePicParam->pic_file_path = new char[strlen(pic_file_path)+1];
     strcpy(parsePicParam->pic_file_path, pic_file_path);
 
-    parsePicParam->listenr = on_plate_msg_listener;
-    parsePicParam->env = env;
-
 //    pthread_mutex_init(&mutex, NULL);
 //
 //    pthread_t pid;
 
 
-    JavaCallHelper* javaCallHelper = new JavaCallHelper(javaVm, env, on_plate_msg_listener);
-    PicParser* parser = new PicParser(javaCallHelper);
+    PicParser* parser = new PicParser();
 
-    parser->parsePic(parsePicParam);
+    PlateInPicMsgBean* plateInPicMsgBean = parser->parsePic(parsePicParam);
+
+
+
+    char* clazzName = "com/carben/carplate/PlateParam";
+    // 找到对象的Java类
+    jclass plateClazz = env->FindClass(clazzName);
+
+    // 获取类的构造函数，记住这里是调用无参的构造函数
+    jmethodID id = env->GetMethodID(plateClazz, "<init>", "()V");
+    // 创建一个新的对象
+    jobject plateMsg_ = env->NewObject(plateClazz, id);
+
+    jfieldID plateNum = env->GetFieldID(plateClazz, "plateNum", "Ljava/lang/String;");
+    jfieldID filePath = env->GetFieldID(plateClazz, "picFilePath", "Ljava/lang/String;");
+    jfieldID offsetCenterX = env->GetFieldID(plateClazz, "offsetCenterX", "F");
+    jfieldID offsetCenterY = env->GetFieldID(plateClazz, "offsetCenterY", "F");
+    jfieldID offsetWidth = env->GetFieldID(plateClazz, "offsetWidth", "F");
+    jfieldID offsetHeight = env->GetFieldID(plateClazz, "offsetHeight", "F");
+    jfieldID angle = env->GetFieldID(plateClazz, "angle", "F");
+    jfieldID picWidth = env->GetFieldID(plateClazz, "picWidth", "F");
+    jfieldID picHeight = env->GetFieldID(plateClazz, "picHeight", "F");
+
+    env->SetObjectField(plateMsg_, plateNum, env->NewStringUTF(plateInPicMsgBean->plate));
+    env->SetObjectField(plateMsg_, filePath, env->NewStringUTF(plateInPicMsgBean->picFilePath));
+    env->SetFloatField(plateMsg_, offsetCenterX, plateInPicMsgBean->offsetCenterX);
+    env->SetFloatField(plateMsg_, offsetCenterY, plateInPicMsgBean->offsetCenterY);
+    env->SetFloatField(plateMsg_, offsetWidth, plateInPicMsgBean->offsetWidth);
+    env->SetFloatField(plateMsg_, offsetHeight, plateInPicMsgBean->offsetHeight);
+    env->SetFloatField(plateMsg_, angle, plateInPicMsgBean->angle);
+    env->SetFloatField(plateMsg_, picWidth, plateInPicMsgBean->picWidth);
+    env->SetFloatField(plateMsg_, picHeight, plateInPicMsgBean->picHeight);
+
+
+    delete plateInPicMsgBean;
 
 
     env->ReleaseStringUTFChars(hog_plate_shape_model, hog_model_file_path);
@@ -68,5 +97,5 @@ Java_com_carben_carplate_RecognicePlateHelper_getPlateMsg(JNIEnv *env, jobject t
     env->ReleaseStringUTFChars(hog_ann_model, hog_ann_file_path);
     env->ReleaseStringUTFChars(pic_file, pic_file_path);
 
-
+    return plateMsg_;
 }

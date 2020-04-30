@@ -17,6 +17,9 @@ public:
     float offsetCenterX;
     float offsetCenterY;
     float angle;
+    float picWidth;
+    float picHeight;
+    char* picFilePath;
     
 };
 
