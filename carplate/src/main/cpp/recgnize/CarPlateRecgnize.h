@@ -34,7 +34,7 @@ private:
     int getCityIndex(vector<Rect> src);
     void getChineseRect(Rect city,Rect& chineseRect);
 
-    void predict(vector<Mat> plateChar,string& result);
+    void predict(vector<Mat> plateChar,String& result);
 
     CarSobelPlateLocation *plateLocation = 0;
     CarColorPlateLocation *plateColorLocation = 0;

@@ -215,7 +215,7 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
     vector<Mat> plateChar;
     // ∂±
-    string plate_str;
+    String plate_str;
 
     //通过城市的下标 判断获取汉字轮廓
     Rect chineseRect;
@@ -247,7 +247,7 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
     delete targetHsv;
 
 
-    plate_total_msg->plate = (char*)plate_str.c_str();
+    plate_total_msg->plate = const_cast<char *>(plate_str.c_str());
 
     return plate_total_msg;
 }
@@ -361,7 +361,7 @@ void CarPlateRecgnize::getChineseRect(Rect city, Rect& chineseRect) {
 }
 
 
-void CarPlateRecgnize::predict(vector<Mat> vec,string& result) {
+void CarPlateRecgnize::predict(vector<Mat> vec,String& result) {
     for (size_t i = 0; i < vec.size(); i++)
     {
         //提取图片特征去进行识别
