@@ -4,7 +4,7 @@
 #include "CarPlateRecgnize.h"
 
 
-string CarPlateRecgnize::ZHCHARS[] = { "川","鄂","赣","甘","贵","桂","黑","沪","冀","津","京","吉","辽","鲁","蒙","闽","宁","青","琼","陕","苏","晋","皖","湘","新","豫","渝","粤","云","藏","浙" };
+string CarPlateRecgnize::ZHCHARS[] = {"川","鄂","赣","甘","贵","桂","黑","沪","冀","津","京","吉","辽","鲁","蒙","闽","宁","青","琼","陕","苏","晋","皖","湘","新","豫","渝","粤","云","藏","浙"   };
 char CarPlateRecgnize::CHARS[] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z' };
 
 CarPlateRecgnize::CarPlateRecgnize(const char* svm_model,const char* ann_ch_path,const char* ann_path) {
@@ -142,7 +142,7 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
     Mat plate_gray;
 
-    if(plate_from_type == 1) {
+//    if(plate_from_type == 1) {
         //通过颜色识别出的图形，使用原来颜色的二值器进行二值化
         //将牌照背景和文字二值化
         Mat plate_threshold;
@@ -161,11 +161,10 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
         cvtColor(plate_threshold, plate_threshold, COLOR_HSV2RGB);
         cvtColor(plate_threshold, plate_gray, COLOR_RGB2GRAY);
 
-        delete normalHsv;
-        delete targetHsv;
-    } else {
-        cvtColor(dst,plate_gray, COLOR_BGR2GRAY);
-    }
+
+//    } else {
+//        cvtColor(dst,plate_gray, COLOR_BGR2GRAY);
+//    }
 
 
     Mat plate_shold;
@@ -241,8 +240,11 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
 
 
-//    plate_gray.release();
+    plate_gray.release();
     plate_shold.release();
+    plate_threshold.release();
+    delete normalHsv;
+    delete targetHsv;
 
 
     plate_total_msg->plate = (char*)plate_str.c_str();

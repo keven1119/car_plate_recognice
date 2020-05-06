@@ -78,15 +78,15 @@ Java_com_carben_carplate_RecognicePlateHelper_getPlateMsg(JNIEnv *env, jobject t
     jfieldID picWidth = env->GetFieldID(plateClazz, "picWidth", "F");
     jfieldID picHeight = env->GetFieldID(plateClazz, "picHeight", "F");
 
-    env->SetObjectField(plateMsg_, plateNum, env->NewStringUTF(plateInPicMsgBean->plate));
-    env->SetObjectField(plateMsg_, filePath, env->NewStringUTF(plateInPicMsgBean->picFilePath));
-    env->SetFloatField(plateMsg_, offsetCenterX, plateInPicMsgBean->offsetCenterX);
-    env->SetFloatField(plateMsg_, offsetCenterY, plateInPicMsgBean->offsetCenterY);
-    env->SetFloatField(plateMsg_, offsetWidth, plateInPicMsgBean->offsetWidth);
-    env->SetFloatField(plateMsg_, offsetHeight, plateInPicMsgBean->offsetHeight);
-    env->SetFloatField(plateMsg_, angle, plateInPicMsgBean->angle);
-    env->SetFloatField(plateMsg_, picWidth, plateInPicMsgBean->picWidth);
-    env->SetFloatField(plateMsg_, picHeight, plateInPicMsgBean->picHeight);
+    env->SetObjectField(plateMsg_, plateNum, env->NewStringUTF((*plateInPicMsgBean).plate));
+    env->SetObjectField(plateMsg_, filePath, env->NewStringUTF((*plateInPicMsgBean).picFilePath));
+    env->SetFloatField(plateMsg_, offsetCenterX, (*plateInPicMsgBean).offsetCenterX);
+    env->SetFloatField(plateMsg_, offsetCenterY, (*plateInPicMsgBean).offsetCenterY);
+    env->SetFloatField(plateMsg_, offsetWidth, (*plateInPicMsgBean).offsetWidth);
+    env->SetFloatField(plateMsg_, offsetHeight, (*plateInPicMsgBean).offsetHeight);
+    env->SetFloatField(plateMsg_, angle, (*plateInPicMsgBean).angle);
+    env->SetFloatField(plateMsg_, picWidth, (*plateInPicMsgBean).picWidth);
+    env->SetFloatField(plateMsg_, picHeight, (*plateInPicMsgBean).picHeight);
 
 
     delete plateInPicMsgBean;
