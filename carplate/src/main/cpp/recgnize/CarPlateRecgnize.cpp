@@ -118,14 +118,16 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
     if (index >= 0) {
 
-        recognicePic(&(plates[index]),NULL,plate_total_msg);
+        PlateBean dstPlateBean = plates[index];
+
+        recognicePic(&(dstPlateBean),plateColorLocation,plate_total_msg);
 
         char* plateNum = plate_total_msg->plate;
 
         if(plateNum && *plateNum != '\0'){
 
         } else{
-            recognicePic(&(plates[index]), plateColorLocation, plate_total_msg);
+            recognicePic(&(dstPlateBean), NULL, plate_total_msg);
         }
 
 //        PlateBean target_plate = plates[index];
@@ -143,6 +145,22 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
     }else{
         return plate_total_msg;
     }
+
+    char* dstPlateNum = plate_total_msg->plate;
+
+
+    if(dstPlateNum && *dstPlateNum != '\0'){
+
+    } else{
+        //清除数据
+        plate_total_msg->angle = 0.0;
+        plate_total_msg->offsetCenterX = 0.0;
+        plate_total_msg->offsetCenterY = 0.0;
+        plate_total_msg->offsetWidth = 0.0;
+        plate_total_msg->offsetHeight = 0.0;
+    }
+
+
     // 释放
     for (PlateBean p : plates) {
         p.release();
