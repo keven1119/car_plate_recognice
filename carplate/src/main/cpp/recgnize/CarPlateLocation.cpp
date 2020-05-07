@@ -19,7 +19,7 @@ int CarPlateLocation::verifySizes(RotatedRect rotated_rect) {
     //最小 最大面积 不符合的丢弃
     //给个大概就行 随时调整
     //尽量给大一些没关系， 这还是初步筛选。
-    int min = 20 * aspect ;
+    int min = 20 * aspect *20  ;
     int max = 180 * aspect * 1800;
 
     //比例浮动 error认为也满足

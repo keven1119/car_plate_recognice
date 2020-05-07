@@ -102,7 +102,7 @@ void CarColorPlateLocation::location(Mat src, vector<PlateBean>& dst) {
 //    waitKey();
 
     Mat close = shold ;
-//    Mat element = getStructuringElement(MORPH_RECT, Size(51,20));
+//    Mat element = getStructuringElement(MORPH_RECT, Size(17,3));
 //    morphologyEx(shold, close, MORPH_CLOSE, element);
 //
 
