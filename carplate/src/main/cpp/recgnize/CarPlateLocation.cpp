@@ -94,8 +94,8 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
         plate_msg_bean.plateMat = plate_mat;
         plate_msg_bean.offsetCenterX = roi_rect.center.x;
         plate_msg_bean.offsetCenterY = roi_rect.center.y;
-        plate_msg_bean.offsetCenterWidth = roi_rect_size.width;
-        plate_msg_bean.offsetCenterHeight = roi_rect_size.height;
+        plate_msg_bean.offsetCenterWidth = roi_rect.boundingRect().width;
+        plate_msg_bean.offsetCenterHeight = roi_rect.boundingRect().height;
 
 
         dst_plates.push_back(plate_msg_bean);
