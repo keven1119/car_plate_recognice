@@ -40,6 +40,7 @@ int CarPlateLocation::verifySizes(RotatedRect rotated_rect) {
 * 矫正
 */
 void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<PlateBean> &dst_plates) {
+
     //循环要处理的矩形
     for (RotatedRect roi_rect : rects) {
         if(roi_rect.size.height <= 0){
@@ -63,8 +64,12 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
         Mat src_rect = src(rect);
         //真正的候选车牌
         Mat dst;
+
+
+        float abs_angle = abs(roi_angle);
+
         //不需要旋转的 旋转角度小没必要旋转了
-        if (roi_angle - 5 < 0 && roi_angle + 5 > 0) {
+        if (abs_angle < 5.0 || abs_angle > 45.0) {
             dst = src_rect.clone();
         }
         else {

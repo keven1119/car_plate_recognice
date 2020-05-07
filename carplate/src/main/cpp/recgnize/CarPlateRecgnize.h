@@ -36,6 +36,8 @@ private:
 
     void predict(vector<Mat> plateChar,String& result);
 
+    void recognicePic(PlateBean* target_plate, CarColorPlateLocation* carColorPlateLocation,PlateInPicMsgBean* plateInPicMsgBean);
+
     CarSobelPlateLocation *plateLocation = 0;
     CarColorPlateLocation *plateColorLocation = 0;
     Ptr<SVM> svm;
