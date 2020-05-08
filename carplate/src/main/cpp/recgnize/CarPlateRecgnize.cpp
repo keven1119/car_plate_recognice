@@ -123,6 +123,73 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
 //    int plate_from_type = 0;
 
 //   车牌去重， 有能者麻烦帮忙优化下
+//对集合中的矩形按照x进行一下排序，保证它们是从左到右的顺序
+    sort(tarPlateBeanList.begin(), tarPlateBeanList.end(), [] (const PlateBean r1, const PlateBean r2){
+        return r1.predictScore < r2.predictScore;
+    });
+
+
+    vector<PlateBean > removePlateList;
+
+    for(int i = 0; i< tarPlateBeanList.size();++i){
+
+        PlateBean r1 = tarPlateBeanList[i];
+
+        for(int j = 0; j< tarPlateBeanList.size();++j){
+            PlateBean r2 = tarPlateBeanList[j];
+            if(i != j){
+
+                float r1_left = r1.offsetCenterX - r1.offsetWidth/2;
+                float r1_right = r1.offsetCenterX +r1.offsetWidth/2;
+                float r1_top = r1.offsetCenterY - r1.offsetHeight/2;
+                float r1_bottom = r1.offsetCenterY - r1.offsetHeight/2;
+
+
+                float r2_left = r2.offsetCenterX - r2.offsetWidth/2;
+                float r2_right = r2.offsetCenterX + r2.offsetWidth/2;
+                float r2_top = r2.offsetCenterY - r2.offsetHeight/2;
+                float r2_bottom = r2.offsetCenterY - r2.offsetHeight/2;
+
+                if( ((r1_right < r2_left) || (r1_bottom > r2_top)) ||
+                    ((r2_right < r1_left) || (r2_bottom > r1_top))){
+
+                    if(r1.predictScore < r2.predictScore){
+                        removePlateList.push_back(r2);
+                    } else{
+                        removePlateList.push_back(r1);
+                    }
+                }
+            }
+
+        }
+    }
+
+    vector<PlateBean> newTargetPlateList;
+
+    for (int i = 0; i < tarPlateBeanList.size(); ++i) {
+        bool istoRemove = false;
+
+        PlateBean index_target_plate = tarPlateBeanList[i];
+
+        for(int j = 0; j < removePlateList.size(); ++j){
+            PlateBean remove_plate = removePlateList[j];
+
+            if(remove_plate.offsetCenterX == index_target_plate.offsetCenterX &&
+                    remove_plate.offsetCenterY == index_target_plate.offsetCenterY &&
+                    remove_plate.offsetWidth == index_target_plate.offsetWidth &&
+                    remove_plate.offsetHeight == index_target_plate.offsetHeight ){
+                istoRemove = true;
+                break;
+            }
+        }
+
+        if(!istoRemove){
+            newTargetPlateList.push_back(index_target_plate);
+        }
+    }
+
+
+    tarPlateBeanList = newTargetPlateList;
 
     for (int i = 0; i < tarPlateBeanList.size(); ++i) {
         PlateBean targetPlateBean = tarPlateBeanList[i];
@@ -140,66 +207,7 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
         }
     }
 
-    //对集合中的矩形按照x进行一下排序，保证它们是从左到右的顺序
-    sort(plateInPicList.begin(), plateInPicList.end(), [] (const PlateInPicMsgBean* r1, const PlateInPicMsgBean* r2){
-        return r1->predictScore < r2->predictScore;
-    });
 
-
-    vector<PlateInPicMsgBean* > removeIndexList;
-
-    for(int i = 0; i< plateInPicList.size();++i){
-
-        PlateInPicMsgBean* r1 = plateInPicList[i];
-
-        for(int j = 0; j< plateInPicList.size();++j){
-            PlateInPicMsgBean* r2 = plateInPicList[j];
-            if(i != j){
-
-                float r1_left = r1->offsetCenterX - r1->offsetWidth/2;
-                float r1_right = r1->offsetCenterX + r1->offsetWidth/2;
-                float r1_top = r1->offsetCenterY - r1->offsetHeight/2;
-                float r1_bottom = r1->offsetCenterY - r1->offsetHeight/2;
-
-
-                float r2_left = r2->offsetCenterX - r2->offsetWidth/2;
-                float r2_right = r2->offsetCenterX + r2->offsetWidth/2;
-                float r2_top = r2->offsetCenterY - r2->offsetHeight/2;
-                float r2_bottom = r2->offsetCenterY - r2->offsetHeight/2;
-
-                if( ((r1_right < r2_left) || (r1_bottom > r2_top)) ||
-                    ((r2_right < r1_left) || (r2_bottom > r1_top))){
-
-                    if(r1->predictScore < r2->predictScore){
-                        removeIndexList.push_back(r2);
-                    } else{
-                        removeIndexList.push_back(r1);
-                    }
-                }
-            }
-
-        }
-    }
-
-    vector<PlateInPicMsgBean* > newPlateInPicList;
-
-    for (int i = 0; i < plateInPicList.size(); ++i) {
-        bool istoRemove = false;
-
-        for(int j = 0; j < removeIndexList.size(); ++j){
-            if(removeIndexList[j] == plateInPicList[i]){
-                istoRemove = true;
-                break;
-            }
-        }
-
-        if(!istoRemove){
-            newPlateInPicList.push_back(plateInPicList[i]);
-        }
-    }
-
-
-    plateInPicList = newPlateInPicList;
 
         // 释放
     for (PlateBean p : plates) {
