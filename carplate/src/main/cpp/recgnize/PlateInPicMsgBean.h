@@ -20,6 +20,7 @@ public:
     float picWidth;
     float picHeight;
     char* picFilePath;
+    float predictScore;
     
 };
 

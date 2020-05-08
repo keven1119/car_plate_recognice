@@ -19,6 +19,7 @@ public:
     float offsetCenterY;
     float offsetWidth;
     float offsetHeight;
+    float predictScore;
     int type = 0; //1:通过颜色获取  ，2：通过sobel获取的
 
     float angle;

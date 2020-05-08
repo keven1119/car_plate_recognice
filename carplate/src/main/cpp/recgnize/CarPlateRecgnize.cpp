@@ -105,10 +105,11 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
 
         float score = svm->predict(samples,noArray(), StatModel::Flags::RAW_OUTPUT);
         //printf("评分：%f\n",score);
-        if (score < 0.2) {
+        if (score < 0.0) {
 //            minScore = score;
 //            index = i;
 
+            plateBean.predictScore = score;
             tarPlateBeanList.push_back(plateBean);
 
         }
@@ -121,7 +122,7 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
 //    Mat dst;
 //    int plate_from_type = 0;
 
-
+//   车牌去重， 有能者麻烦帮忙优化下
 
     for (int i = 0; i < tarPlateBeanList.size(); ++i) {
         PlateBean targetPlateBean = tarPlateBeanList[i];
@@ -129,13 +130,76 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
         PlateInPicMsgBean* plateInPic  = recognisePlateContent(targetPlateBean);
         char* plateNum = plateInPic->plate;
 
+
+        //防止与车牌预测近似，却没有文字的区域添加
         if(plateNum && *plateNum != '\0'){
+            plateInPic->predictScore = targetPlateBean.predictScore;
             plateInPicList.push_back(plateInPic);
         } else{
             delete plateInPic;
         }
     }
 
+    //对集合中的矩形按照x进行一下排序，保证它们是从左到右的顺序
+    sort(plateInPicList.begin(), plateInPicList.end(), [] (const PlateInPicMsgBean* r1, const PlateInPicMsgBean* r2){
+        return r1->predictScore < r2->predictScore;
+    });
+
+
+    vector<PlateInPicMsgBean* > removeIndexList;
+
+    for(int i = 0; i< plateInPicList.size();++i){
+
+        PlateInPicMsgBean* r1 = plateInPicList[i];
+
+        for(int j = 0; j< plateInPicList.size();++j){
+            PlateInPicMsgBean* r2 = plateInPicList[j];
+            if(i != j){
+
+                float r1_left = r1->offsetCenterX - r1->offsetWidth/2;
+                float r1_right = r1->offsetCenterX + r1->offsetWidth/2;
+                float r1_top = r1->offsetCenterY - r1->offsetHeight/2;
+                float r1_bottom = r1->offsetCenterY - r1->offsetHeight/2;
+
+
+                float r2_left = r2->offsetCenterX - r2->offsetWidth/2;
+                float r2_right = r2->offsetCenterX + r2->offsetWidth/2;
+                float r2_top = r2->offsetCenterY - r2->offsetHeight/2;
+                float r2_bottom = r2->offsetCenterY - r2->offsetHeight/2;
+
+                if( ((r1_right < r2_left) || (r1_bottom > r2_top)) ||
+                    ((r2_right < r1_left) || (r2_bottom > r1_top))){
+
+                    if(r1->predictScore < r2->predictScore){
+                        removeIndexList.push_back(r2);
+                    } else{
+                        removeIndexList.push_back(r1);
+                    }
+                }
+            }
+
+        }
+    }
+
+    vector<PlateInPicMsgBean* > newPlateInPicList;
+
+    for (int i = 0; i < plateInPicList.size(); ++i) {
+        bool istoRemove = false;
+
+        for(int j = 0; j < removeIndexList.size(); ++j){
+            if(removeIndexList[j] == plateInPicList[i]){
+                istoRemove = true;
+                break;
+            }
+        }
+
+        if(!istoRemove){
+            newPlateInPicList.push_back(plateInPicList[i]);
+        }
+    }
+
+
+    plateInPicList = newPlateInPicList;
 
         // 释放
     for (PlateBean p : plates) {
@@ -144,54 +208,6 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
 
     plates.clear();
     tarPlateBeanList.clear();
-
-//
-//    if (index >= 0) {
-//
-//        PlateBean dstPlateBean = plates[index];
-
-//        recognicePic(&(dstPlateBean),plateColorLocation,plate_total_msg);
-//
-//        char* plateNum = plate_total_msg->plate;
-//
-//        if(plateNum && *plateNum != '\0'){
-//
-//        } else{
-//            recognicePic(&(dstPlateBean), NULL, plate_total_msg);
-//        }
-
-//        PlateBean target_plate = plates[index];
-//        plate_from_type = target_plate.type;
-//
-//        dst = target_plate.plateMat.clone();
-//        plate_total_msg->offsetCenterX = target_plate.offsetCenterX;
-//        plate_total_msg->offsetCenterY = target_plate.offsetCenterY;
-//        plate_total_msg->angle = target_plate.angle;
-//        plate_total_msg->offsetWidth = target_plate.offsetCenterWidth;
-//        plate_total_msg->offsetHeight = target_plate.offsetCenterHeight;
-
-
-
-//    }else{
-//        return plate_total_msg;
-//    }
-//
-//    char* dstPlateNum = plate_total_msg->plate;
-//
-//
-//    if(dstPlateNum && *dstPlateNum != '\0'){
-//
-//    } else{
-//        //清除数据
-//        plate_total_msg->angle = 0.0;
-//        plate_total_msg->offsetCenterX = 0.0;
-//        plate_total_msg->offsetCenterY = 0.0;
-//        plate_total_msg->offsetWidth = 0.0;
-//        plate_total_msg->offsetHeight = 0.0;
-//    }
-
-
-
 
 }
 
