@@ -66,10 +66,29 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
         Mat dst;
 
 
-        float abs_angle = abs(roi_angle);
+        float target_angle = 0.0f;
+
+        if(roi_angle <= 45.0f && roi_angle >= -45.0f){
+            target_angle = roi_angle;
+        } else if(roi_angle < -45.0f){
+            target_angle = -(-90.0f - roi_angle);
+        } else if(roi_angle > 45.0f){
+            target_angle = -(90.0f - roi_angle);
+        }
+
+        int dstWidth = 0;
+        int dstHeight = 0;
+
+        if(roi_rect_size.width > roi_rect_size.height){
+            dstWidth = roi_rect_size.width;
+            dstHeight = roi_rect_size.height;
+        } else{
+            dstWidth = roi_rect_size.height;
+            dstHeight = roi_rect_size.width;
+        }
 
         //不需要旋转的 旋转角度小没必要旋转了
-        if (abs_angle < 5.0 || abs_angle > 45.0) {
+        if (target_angle < 5.0 && target_angle > -5.0) {
             dst = src_rect.clone();
         }
         else {
@@ -78,7 +97,7 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
             Point2f roi_ref_center = roi_rect.center - rect.tl();
             Mat rotated_mat;
             //矫正 rotated_mat: 矫正后的图片
-            rotation(src_rect, rotated_mat, roi_rect_size, roi_ref_center, roi_angle);
+            rotation(src_rect, rotated_mat, Size(dstWidth, dstHeight), roi_ref_center, target_angle);
             dst = rotated_mat;
         }
 
@@ -94,8 +113,10 @@ void CarPlateLocation::tortuosity(Mat src, vector<RotatedRect> &rects, vector<Pl
         plate_msg_bean.plateMat = plate_mat;
         plate_msg_bean.offsetCenterX = roi_rect.center.x;
         plate_msg_bean.offsetCenterY = roi_rect.center.y;
-        plate_msg_bean.offsetCenterWidth = roi_rect.boundingRect().width;
-        plate_msg_bean.offsetCenterHeight = roi_rect.boundingRect().height;
+
+        plate_msg_bean.offsetWidth = dstWidth;
+        plate_msg_bean.offsetHeight = dstHeight;
+
 
 
         dst_plates.push_back(plate_msg_bean);
@@ -147,3 +168,11 @@ void CarPlateLocation::rotation(Mat src, Mat &dst, Size rect_size,
     mat_rotated.release();
     rot_mat.release();
 }
+
+////获取像素的量化值
+//int CarPlateLocation::getDegree(uchar Hv,uchar  Sv,uchar  Vv) {
+//    auto a = int(Hv/(uchar)HD);
+//    auto b = (Sv >> 5);
+//    auto c = ((a << 3) + b);
+//    return c;
+//}

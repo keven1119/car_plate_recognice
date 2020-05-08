@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -23,6 +25,8 @@ import android.widget.Toast;
 
 import com.carben.carplate.PlateParam;
 import com.carben.carplate.RecognicePlateHelper;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,9 +75,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
                 String realPath = picFilePath.replace("/storage/emulated/0", "sdcard");
 
-                final PlateParam plateMsg = new RecognicePlateHelper().getPlateMsg(
+
+                final PlateParam plateMsg = new RecognicePlateHelper().getRealPlateMsg(
                         "sdcard/HOG_SVM_DATA2.xml",
                         "sdcard/HOG_ANN_ZH_DATA2.xml",
                         "sdcard/HOG_ANN_DATA2.xml",

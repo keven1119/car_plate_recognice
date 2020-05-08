@@ -17,8 +17,8 @@ public:
     Mat plateMat;
     float offsetCenterX;
     float offsetCenterY;
-    float offsetCenterWidth;
-    float offsetCenterHeight;
+    float offsetWidth;
+    float offsetHeight;
     int type = 0; //1:通过颜色获取  ，2：通过sobel获取的
 
     float angle;

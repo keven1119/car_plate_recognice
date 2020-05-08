@@ -46,4 +46,8 @@ public  class PlateParam{
         public float getPicHeight() {
                 return picHeight;
         }
+
+        public void setAngle(float angle) {
+                this.angle = angle;
+        }
 }

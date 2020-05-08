@@ -180,8 +180,8 @@ void CarPlateRecgnize::recognicePic(PlateBean* target_plate, CarColorPlateLocati
         plateInPicMsgBean->offsetCenterX = target_plate->offsetCenterX;
         plateInPicMsgBean->offsetCenterY = target_plate->offsetCenterY;
         plateInPicMsgBean->angle = target_plate->angle;
-        plateInPicMsgBean->offsetWidth = target_plate->offsetCenterWidth;
-        plateInPicMsgBean->offsetHeight = target_plate->offsetCenterHeight;
+        plateInPicMsgBean->offsetWidth = target_plate->offsetWidth;
+        plateInPicMsgBean->offsetHeight = target_plate->offsetHeight;
 
     }else{
         return;
