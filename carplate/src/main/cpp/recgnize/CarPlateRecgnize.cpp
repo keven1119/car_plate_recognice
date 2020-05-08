@@ -142,16 +142,16 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
                 float r1_left = r1.offsetCenterX - r1.offsetWidth/2;
                 float r1_right = r1.offsetCenterX +r1.offsetWidth/2;
                 float r1_top = r1.offsetCenterY - r1.offsetHeight/2;
-                float r1_bottom = r1.offsetCenterY - r1.offsetHeight/2;
+                float r1_bottom = r1.offsetCenterY + r1.offsetHeight/2;
 
 
                 float r2_left = r2.offsetCenterX - r2.offsetWidth/2;
                 float r2_right = r2.offsetCenterX + r2.offsetWidth/2;
                 float r2_top = r2.offsetCenterY - r2.offsetHeight/2;
-                float r2_bottom = r2.offsetCenterY - r2.offsetHeight/2;
+                float r2_bottom = r2.offsetCenterY + r2.offsetHeight/2;
 
-                if( ((r1_right < r2_left) || (r1_bottom > r2_top)) ||
-                    ((r2_right < r1_left) || (r2_bottom > r1_top))){
+                if(!(((r1_right < r2_left) || (r1_bottom > r2_top)) ||
+                    ((r2_right < r1_left) || (r2_bottom > r1_top)))){
 
                     if(r1.predictScore < r2.predictScore){
                         removePlateList.push_back(r2);
