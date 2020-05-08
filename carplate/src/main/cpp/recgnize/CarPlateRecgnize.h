@@ -23,7 +23,7 @@ public:
     *        1°¢∂®Œª
     *        2°¢ ∂±
     */
-    PlateInPicMsgBean* plateRecgnize(Mat src);
+    void plateRecgnize(Mat src, vector<PlateInPicMsgBean*>& plateList);
 private:
     void getHogFeatures(HOGDescriptor* svmHog,Mat src,Mat& out);
 
@@ -37,6 +37,8 @@ private:
     void predict(vector<Mat> plateChar,String& result);
 
     void recognicePic(PlateBean* target_plate, CarColorPlateLocation* carColorPlateLocation,PlateInPicMsgBean* plateInPicMsgBean);
+
+    PlateInPicMsgBean* recognisePlateContent(PlateBean dstPlateBean);
 
     CarSobelPlateLocation *plateLocation = 0;
     CarColorPlateLocation *plateColorLocation = 0;

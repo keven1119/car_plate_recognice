@@ -27,6 +27,7 @@ import com.carben.carplate.PlateParam;
 import com.carben.carplate.RecognicePlateHelper;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,60 +80,17 @@ public class MainActivity extends AppCompatActivity {
                 String realPath = picFilePath.replace("/storage/emulated/0", "sdcard");
 
 
-                final PlateParam plateMsg = new RecognicePlateHelper().getRealPlateMsg(
+                final List<PlateParam> plateMsgList = new RecognicePlateHelper().getRealPlateMsgList(
                         "sdcard/HOG_SVM_DATA2.xml",
                         "sdcard/HOG_ANN_ZH_DATA2.xml",
                         "sdcard/HOG_ANN_DATA2.xml",
                         realPath);
 
-                ImageView imageView = new ImageView(MainActivity.this);
-                imageView.setBackgroundColor(Color.RED);
+                for (PlateParam param:plateMsgList){
+                    addPlateCover(param);
+                }
 
 
-                int containerWidth = coverContainer.getWidth();
-                int orignalWidth = currentBitmap.getWidth();
-
-                float ratio =  (float) containerWidth/ orignalWidth;
-
-                int coverWidth = (int)(plateMsg.getOffsetWidth() * ratio);
-                int coverHeight = (int)(plateMsg.getOffsetHeight() * ratio);
-
-
-                int coverMarginLeft = (int)( plateMsg.getOffsetCenterX() * ratio - (float)coverWidth/2);
-                int coverMarginTop = (int)(plateMsg.getOffsetCenterY() * ratio - (float)coverHeight/2);
-
-                coverContainer.addView(imageView);
-
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams)imageView.getLayoutParams();
-
-                layoutParams.leftMargin = coverMarginLeft;
-                layoutParams.topMargin = coverMarginTop;
-
-                layoutParams.width = coverWidth;
-                layoutParams.height = coverHeight;
-
-                imageView.setLayoutParams(layoutParams);
-                imageView.setPivotX(coverWidth/2f);
-                imageView.setPivotY(coverHeight/2f);
-                imageView.setRotation(plateMsg.getAngle());
-
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this,
-                                plateMsg.getPlateNum() + "\n" +
-                                        plateMsg.getAngle() + "\n" +
-                                        plateMsg.getOffsetCenterX() + "\n" +
-                                        plateMsg.getOffsetCenterY() + "\n" +
-                                        plateMsg.getOffsetWidth() + "\n" +
-                                        plateMsg.getOffsetHeight() + "\n" +
-                                        plateMsg.getPicFilePath() + "\n" +
-                                        plateMsg.getPicHeight() + "\n" +
-                                        plateMsg.getPicWidth() + "\n" ,Toast.LENGTH_LONG)
-                                .show();
-                    }
-                });
             }
         });
 
@@ -140,6 +98,57 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 coverContainer.removeAllViews();
+            }
+        });
+    }
+
+    private void addPlateCover(final PlateParam plateMsg){
+        ImageView imageView = new ImageView(MainActivity.this);
+        imageView.setBackgroundColor(Color.RED);
+
+
+        int containerWidth = coverContainer.getWidth();
+        int orignalWidth = currentBitmap.getWidth();
+
+        float ratio =  (float) containerWidth/ orignalWidth;
+
+        int coverWidth = (int)(plateMsg.getOffsetWidth() * ratio);
+        int coverHeight = (int)(plateMsg.getOffsetHeight() * ratio);
+
+
+        int coverMarginLeft = (int)( plateMsg.getOffsetCenterX() * ratio - (float)coverWidth/2);
+        int coverMarginTop = (int)(plateMsg.getOffsetCenterY() * ratio - (float)coverHeight/2);
+
+        coverContainer.addView(imageView);
+
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams)imageView.getLayoutParams();
+
+        layoutParams.leftMargin = coverMarginLeft;
+        layoutParams.topMargin = coverMarginTop;
+
+        layoutParams.width = coverWidth;
+        layoutParams.height = coverHeight;
+
+        imageView.setLayoutParams(layoutParams);
+        imageView.setPivotX(coverWidth/2f);
+        imageView.setPivotY(coverHeight/2f);
+        imageView.setRotation(plateMsg.getAngle());
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this,
+                        plateMsg.getPlateNum() + "\n" +
+                                plateMsg.getAngle() + "\n" +
+                                plateMsg.getOffsetCenterX() + "\n" +
+                                plateMsg.getOffsetCenterY() + "\n" +
+                                plateMsg.getOffsetWidth() + "\n" +
+                                plateMsg.getOffsetHeight() + "\n" +
+                                plateMsg.getPicFilePath() + "\n" +
+                                plateMsg.getPicHeight() + "\n" +
+                                plateMsg.getPicWidth() + "\n" ,Toast.LENGTH_LONG)
+                        .show();
             }
         });
     }

@@ -52,9 +52,7 @@ CarPlateRecgnize::~CarPlateRecgnize() {
 *        1、定位
 *        2、识别
 */
-PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
-
-    PlateInPicMsgBean* plate_total_msg = new PlateInPicMsgBean();
+void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plateInPicList) {
 
 
     vector< PlateBean > sobel_plates;
@@ -63,7 +61,7 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
     //颜色定位
     vector< PlateBean > color_plates;
-    plateColorLocation->location(src, color_plates);
+    plateColorLocation->location(src,color_plates);
 
     vector<PlateBean> plates;
     //把sobel_plates的内容 全部加入plates向量
@@ -71,9 +69,14 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
     plates.insert(plates.end(), color_plates.begin(), color_plates.end());
     int index = -1;
     float minScore = FLT_MAX; //floatµƒ◊Ó¥Û÷µ
+
+    vector<PlateBean> tarPlateBeanList ;
     //使用 svm 进行 评测
     for (int i = 0;i< plates.size();++i){
-        Mat plate = plates[i].plateMat;
+
+        PlateBean plateBean = plates[i];
+
+        Mat plate = plateBean.plateMat;
 
 
 //        imshow("name",plate);
@@ -102,9 +105,12 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
         float score = svm->predict(samples,noArray(), StatModel::Flags::RAW_OUTPUT);
         //printf("评分：%f\n",score);
-        if (score < minScore) {
-            minScore = score;
-            index = i;
+        if (score < 0.2) {
+//            minScore = score;
+//            index = i;
+
+            tarPlateBeanList.push_back(plateBean);
+
         }
         gray.release();
         shold.release();
@@ -116,19 +122,43 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 //    int plate_from_type = 0;
 
 
-    if (index >= 0) {
 
-        PlateBean dstPlateBean = plates[index];
+    for (int i = 0; i < tarPlateBeanList.size(); ++i) {
+        PlateBean targetPlateBean = tarPlateBeanList[i];
 
-        recognicePic(&(dstPlateBean),plateColorLocation,plate_total_msg);
-
-        char* plateNum = plate_total_msg->plate;
+        PlateInPicMsgBean* plateInPic  = recognisePlateContent(targetPlateBean);
+        char* plateNum = plateInPic->plate;
 
         if(plateNum && *plateNum != '\0'){
-
+            plateInPicList.push_back(plateInPic);
         } else{
-            recognicePic(&(dstPlateBean), NULL, plate_total_msg);
+            delete plateInPic;
         }
+    }
+
+
+        // 释放
+    for (PlateBean p : plates) {
+        p.release();
+    }
+
+    plates.clear();
+    tarPlateBeanList.clear();
+
+//
+//    if (index >= 0) {
+//
+//        PlateBean dstPlateBean = plates[index];
+
+//        recognicePic(&(dstPlateBean),plateColorLocation,plate_total_msg);
+//
+//        char* plateNum = plate_total_msg->plate;
+//
+//        if(plateNum && *plateNum != '\0'){
+//
+//        } else{
+//            recognicePic(&(dstPlateBean), NULL, plate_total_msg);
+//        }
 
 //        PlateBean target_plate = plates[index];
 //        plate_from_type = target_plate.type;
@@ -142,28 +172,41 @@ PlateInPicMsgBean* CarPlateRecgnize::plateRecgnize(Mat src) {
 
 
 
-    }else{
-        return plate_total_msg;
-    }
+//    }else{
+//        return plate_total_msg;
+//    }
+//
+//    char* dstPlateNum = plate_total_msg->plate;
+//
+//
+//    if(dstPlateNum && *dstPlateNum != '\0'){
+//
+//    } else{
+//        //清除数据
+//        plate_total_msg->angle = 0.0;
+//        plate_total_msg->offsetCenterX = 0.0;
+//        plate_total_msg->offsetCenterY = 0.0;
+//        plate_total_msg->offsetWidth = 0.0;
+//        plate_total_msg->offsetHeight = 0.0;
+//    }
 
-    char* dstPlateNum = plate_total_msg->plate;
 
 
-    if(dstPlateNum && *dstPlateNum != '\0'){
+
+}
+
+PlateInPicMsgBean* CarPlateRecgnize::recognisePlateContent(PlateBean dstPlateBean){
+
+    PlateInPicMsgBean* plate_total_msg = new PlateInPicMsgBean();
+
+    recognicePic(&(dstPlateBean),plateColorLocation,plate_total_msg);
+
+    char* plateNum = plate_total_msg->plate;
+
+    if(plateNum && *plateNum != '\0'){
 
     } else{
-        //清除数据
-        plate_total_msg->angle = 0.0;
-        plate_total_msg->offsetCenterX = 0.0;
-        plate_total_msg->offsetCenterY = 0.0;
-        plate_total_msg->offsetWidth = 0.0;
-        plate_total_msg->offsetHeight = 0.0;
-    }
-
-
-    // 释放
-    for (PlateBean p : plates) {
-        p.release();
+        recognicePic(&(dstPlateBean), NULL, plate_total_msg);
     }
 
     return plate_total_msg;
@@ -457,3 +500,5 @@ void CarPlateRecgnize::predict(vector<Mat> vec,String& result) {
         cout << "匹配度:" << minLoc.x << endl;
     }
 }
+
+

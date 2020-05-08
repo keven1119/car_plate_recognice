@@ -14,8 +14,6 @@ public:
 
     // 1°¢“™∂®ŒªµƒÕº∆¨ 2°¢“˝”√¿‡–Õ ◊˜Œ™∂®ŒªΩ·π˚
     void location(Mat src,vector<PlateBean>& dst);
-
-
 };
 
 

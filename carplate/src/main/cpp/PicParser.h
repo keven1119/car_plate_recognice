@@ -12,7 +12,9 @@
 #include <pthread.h>
 #include <PlateInPicMsgBean.h>
 
+
 using namespace cv;
+using namespace std;
 
 
 class PicParser{
@@ -23,7 +25,7 @@ public:
     PicParser();
     ~PicParser();
 
-    PlateInPicMsgBean* parsePic(ParsePicParam* parsePicParam);
+    void parsePic(ParsePicParam* parsePicParam, vector<PlateInPicMsgBean*>& plateInPicList);
 
 
 };

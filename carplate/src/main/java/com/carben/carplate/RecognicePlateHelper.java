@@ -1,5 +1,7 @@
 package com.carben.carplate;
 
+import java.util.List;
+
 public class RecognicePlateHelper {
 
 
@@ -9,13 +11,23 @@ public class RecognicePlateHelper {
 
 //    public native void getString();
 
-    public PlateParam getRealPlateMsg( String hogPlateShapeModel,
+    public List<PlateParam> getRealPlateMsgList( String hogPlateShapeModel,
                                        String hogAnnZhModel,
                                        String hogAnnModel,
                                        String picFilePath){
 
-        PlateParam plateMsg = getPlateMsg(hogPlateShapeModel, hogAnnZhModel, hogAnnModel, picFilePath);
+        List<PlateParam> plateMsgList = getPlateMsg(hogPlateShapeModel, hogAnnZhModel, hogAnnModel, picFilePath);
 
+        for (PlateParam plateParam :plateMsgList){
+            correctPlateAngle(plateParam);
+        }
+
+
+        return plateMsgList;
+
+    }
+
+    private PlateParam correctPlateAngle(PlateParam plateMsg){
         float angle = plateMsg.getAngle();
 
         if(angle >= -45f && angle <= 45f){
@@ -27,10 +39,9 @@ public class RecognicePlateHelper {
         }
 
         return plateMsg;
-
     }
 
-    public native PlateParam getPlateMsg(
+    public native List<PlateParam> getPlateMsg(
             String hogPlateShapeModel,
             String hogAnnZhModel,
             String hogAnnModel,
