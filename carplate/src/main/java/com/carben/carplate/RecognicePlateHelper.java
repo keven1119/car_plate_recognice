@@ -27,7 +27,7 @@ public class RecognicePlateHelper {
             PlateParam next = iterator.next();
             if(TextUtils.isEmpty(next.plateNum)){
                 iterator.remove();
-            }else if(next.getPicHeight()>0 && next.getOffsetWidth()/ next.getOffsetHeight() > 5){
+            }else if(next.getOffsetHeight()>0 && next.getOffsetWidth()/ next.getOffsetHeight() > 5){
                 iterator.remove();
             }else {
                 correctPlateAngle(next);
