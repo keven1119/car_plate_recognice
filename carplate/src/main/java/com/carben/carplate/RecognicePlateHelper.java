@@ -1,5 +1,8 @@
 package com.carben.carplate;
 
+import android.text.TextUtils;
+
+import java.util.Iterator;
 import java.util.List;
 
 public class RecognicePlateHelper {
@@ -18,10 +21,18 @@ public class RecognicePlateHelper {
 
         List<PlateParam> plateMsgList = getPlateMsg(hogPlateShapeModel, hogAnnZhModel, hogAnnModel, picFilePath);
 
-        for (PlateParam plateParam :plateMsgList){
-            correctPlateAngle(plateParam);
-        }
+        Iterator<PlateParam> iterator = plateMsgList.iterator();
 
+        while (iterator.hasNext()){
+            PlateParam next = iterator.next();
+            if(TextUtils.isEmpty(next.plateNum)){
+                iterator.remove();
+            }else if(next.getPicHeight()>0 && next.getPicWidth()/ next.getPicHeight() > 5){
+                iterator.remove();
+            }else {
+                correctPlateAngle(next);
+            }
+        }
 
         return plateMsgList;
 
