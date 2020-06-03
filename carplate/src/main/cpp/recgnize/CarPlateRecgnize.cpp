@@ -150,8 +150,15 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
                 float r2_top = r2.offsetCenterY - r2.offsetHeight/2;
                 float r2_bottom = r2.offsetCenterY + r2.offsetHeight/2;
 
-                if(!(((r1_right < r2_left) || (r1_bottom > r2_top)) ||
-                    ((r2_right < r1_left) || (r2_bottom > r1_top)))){
+                //部分包含
+                bool isInclude = !(((r1_right < r2_left) || (r1_bottom > r2_top)) ||
+                                   ((r2_right < r1_left) || (r2_bottom > r1_top)));
+
+                bool isR2InR1 = r1_left < r2_left && r1_right > r2_right && r1_top < r2_top && r1_bottom > r2_bottom;
+
+                bool isR1InR2 = r1_left > r2_left && r1_right < r2_right && r1_top > r2_top && r1_bottom < r2_bottom;
+
+                if(isInclude || isR1InR2 || isR2InR1){
 
                     if(r1.predictScore < r2.predictScore){
                         removePlateList.push_back(r2);
