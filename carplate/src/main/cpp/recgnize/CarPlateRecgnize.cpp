@@ -63,10 +63,18 @@ void CarPlateRecgnize::plateRecgnize(Mat src,  vector<PlateInPicMsgBean*>& plate
     vector< PlateBean > color_plates;
     plateColorLocation->location(src,color_plates);
 
-    vector<PlateBean> plates;
     //把sobel_plates的内容 全部加入plates向量
-    plates.insert(plates.end(),sobel_plates.begin(), sobel_plates.end());
-    plates.insert(plates.end(), color_plates.begin(), color_plates.end());
+    vector<PlateBean> plates;
+    for (int i = 0; i < sobel_plates.size() ; ++i) {
+        plates.push_back(sobel_plates[i]);
+
+    }
+
+    for (int i = 0; i < color_plates.size() ; ++i) {
+        plates.push_back(color_plates[i]);
+
+    }
+
     int index = -1;
     float minScore = FLT_MAX; //floatµƒ◊Ó¥Û÷µ
 
